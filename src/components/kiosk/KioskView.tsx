@@ -4,11 +4,11 @@ import {
   ShieldCheck,
   Languages,
   Activity,
-  Stethoscope,
   HeartPulse,
   Printer,
   AlertTriangle,
   CheckCircle,
+  FileText,
   ChevronRight,
   ChevronLeft,
   Sparkles,
@@ -126,14 +126,13 @@ export const KioskView: React.FC<KioskViewProps> = ({ onCompleteEncounter }) => 
   const t = UI_TRANSLATIONS[language] || UI_TRANSLATIONS.en;
 
   const handleNext = () => {
-    if (step < 6) {
+    if (step < 5) {
       const nextStep = step + 1;
       setStep(nextStep);
       // Read prompt aloud
       if (nextStep === 3) speakText(t.selectBodyPart, language);
-      if (nextStep === 4) speakText(t.voicePrompt, language);
-      if (nextStep === 5) speakText(t.scanDocuments, language);
-      if (nextStep === 6) {
+      if (nextStep === 4) speakText(t.scanDocuments, language);
+      if (nextStep === 5) {
         processAndFinalizeEncounter();
       }
     }
@@ -309,7 +308,7 @@ export const KioskView: React.FC<KioskViewProps> = ({ onCompleteEncounter }) => 
         respiratory: 'Grade 3 acute dyspnea',
       },
     });
-    setStep(6);
+    setStep(5);
     setTimeout(() => {
       processAndFinalizeEncounter();
     }, 100);
@@ -325,7 +324,7 @@ export const KioskView: React.FC<KioskViewProps> = ({ onCompleteEncounter }) => 
           </div>
           <div>
             <h2 className="kiosk-title">ABHA PRO</h2>
-            <p className="kiosk-tagline">Ayushman Bharat Multimodal OPD Intake Kiosk (ABDM M1/M2/M3)</p>
+            <p className="kiosk-tagline">Patient check-in</p>
           </div>
         </div>
 
@@ -354,7 +353,7 @@ export const KioskView: React.FC<KioskViewProps> = ({ onCompleteEncounter }) => 
             title="Simulate immediate Acute Coronary Syndrome (ACS) Red-Flag Triage"
           >
             <Zap className="w-4 h-4 text-amber-400" />
-            <span>Simulate ACS Emergency Triage</span>
+            <span>Emergency demo</span>
           </button>
         </div>
       </div>
@@ -362,17 +361,16 @@ export const KioskView: React.FC<KioskViewProps> = ({ onCompleteEncounter }) => 
       {/* Stepper Progress Bar */}
       <div className="kiosk-stepper">
         {[
-          { num: 1, label: 'ABHA Identity' },
-          { num: 2, label: 'Language & Mode' },
-          { num: 3, label: 'Body Map & Pain' },
-          { num: 4, label: 'Clinical Dialogue' },
-          { num: 5, label: 'Document AI Scan' },
-          { num: 6, label: 'Queue Token' },
+          { num: 1, label: 'Your details' },
+          { num: 2, label: 'Preferences' },
+          { num: 3, label: 'Your symptoms' },
+          { num: 4, label: 'Documents' },
+          { num: 5, label: 'Check-in complete' },
         ].map((s) => (
           <div
             key={s.num}
             className={`step-item ${step === s.num ? 'active' : step > s.num ? 'completed' : ''}`}
-            onClick={() => s.num < step && setStep(s.num)}
+            onClick={() => setStep(s.num)}
           >
             <div className="step-circle">
               {step > s.num ? <CheckCircle className="w-4 h-4" /> : s.num}
@@ -390,8 +388,9 @@ export const KioskView: React.FC<KioskViewProps> = ({ onCompleteEncounter }) => 
             <div className="step-intro">
               <QrCode className="step-intro-icon text-cyan-400" />
               <div>
-                <h3>{t.scanAbha} / ABHA M1 Milestone Authentication</h3>
-                <p>Scan your physical Ayushman Bharat Health Card or verify via registered Mobile OTP</p>
+                <p className="step-eyebrow">Step 1 of 5</p>
+                <h3>Confirm your ABHA details</h3>
+                <p>Review your information before checking in for your visit.</p>
               </div>
             </div>
 
@@ -480,62 +479,48 @@ export const KioskView: React.FC<KioskViewProps> = ({ onCompleteEncounter }) => 
           </div>
         )}
 
-        {/* STEP 2: Language & Clinical Reasoning Mode */}
+        {/* STEP 2: Language & clinical pathway */}
         {step === 2 && (
           <div className="kiosk-step-card animate-fadeIn">
             <div className="step-intro">
-              <Stethoscope className="step-intro-icon text-indigo-400" />
+              <Languages className="step-intro-icon" />
               <div>
-                <h3>Select Language & Clinical Reasoning Framework</h3>
-                <p>Choose your preferred Indic dialect and OPD consultation discipline</p>
+                <p className="step-eyebrow">Step 2 of 5</p>
+                <h3>Choose your preferences</h3>
+                <p>Select a language and the type of care you’re visiting for.</p>
               </div>
             </div>
 
             <div className="mode-selection-grid">
-              {/* Allopathic Branch Card */}
-              <div
+              <button
+                type="button"
                 className={`mode-card ${clinicalMode === 'ALLOPATHIC' ? 'selected' : ''}`}
                 onClick={() => setClinicalMode('ALLOPATHIC')}
               >
                 <div className="mode-card-header">
-                  <Activity className="mode-icon text-sky-400" />
-                  <span className="mode-tag">Modern Medicine</span>
+                  <Activity className="mode-icon" />
+                  <span className="mode-tag">General OPD</span>
                 </div>
-                <h4>Allopathic Clinical Engine</h4>
-                <p className="mode-desc">
-                  Guided by <strong>SOCRATES</strong> framework (Site, Onset, Character, Radiation, Associations, Timing, Exacerbating factors, Severity) + systemic Review of Systems (ROS).
-                </p>
-                <ul className="mode-features">
-                  <li>✓ Evidence-based ICD-10 differential diagnosis</li>
-                  <li>✓ RxNorm & SNOMED CT drug ontology</li>
-                  <li>✓ Instant Acute Coronary & Stroke Triage</li>
-                </ul>
-              </div>
+                <h4>Modern medicine</h4>
+                <p className="mode-desc">For general physician, medical, or specialty OPD visits.</p>
+              </button>
 
-              {/* AYUSH Branch Card */}
-              <div
+              <button
+                type="button"
                 className={`mode-card ${clinicalMode === 'AYUSH' ? 'selected' : ''}`}
                 onClick={() => setClinicalMode('AYUSH')}
               >
                 <div className="mode-card-header">
-                  <Sparkles className="mode-icon text-emerald-400" />
-                  <span className="mode-tag ayush-tag">AYUSH & Panchakarma</span>
+                  <Sparkles className="mode-icon" />
+                  <span className="mode-tag ayush-tag">AYUSH OPD</span>
                 </div>
-                <h4>AYUSH Diagnostic Engine</h4>
-                <p className="mode-desc">
-                  Guided by <strong>Dashavidha Pariksha</strong> (Prakriti, Vikriti, Sara, Samhanana, Agni, Sattva, Vaya) and <strong>Ashtavidha Pariksha</strong> (Nadi, Mutra, Mala, Jihva, Shabda, Sparsha, Druk, Akruti).
-                </p>
-                <ul className="mode-features">
-                  <li>✓ Tridosha (Vata-Pitta-Kapha) Imbalance Profiling</li>
-                  <li>✓ Ahara-Vihara (Diet & Circadian) Root Cause Analysis</li>
-                  <li>✓ Personalized Pathya-Apathya & Panchakarma Plan</li>
-                </ul>
-              </div>
+                <h4>AYUSH care</h4>
+                <p className="mode-desc">For Ayurveda, Yoga, Unani, Siddha, or Homeopathy consultation.</p>
+              </button>
             </div>
 
-            {/* Language Selection Grid */}
             <div className="language-grid-section">
-              <h5>Select Interface & Voice Language ({SUPPORTED_LANGUAGES.length} Indic Languages Supported):</h5>
+              <h5>Interface language</h5>
               <div className="language-buttons-grid">
                 {SUPPORTED_LANGUAGES.map((lang) => (
                   <button
@@ -561,10 +546,11 @@ export const KioskView: React.FC<KioskViewProps> = ({ onCompleteEncounter }) => 
         {step === 3 && (
           <div className="kiosk-step-card animate-fadeIn">
             <div className="step-intro">
-              <HeartPulse className="step-intro-icon text-rose-400" />
+              <HeartPulse className="step-intro-icon" />
               <div>
-                <h3>{t.selectBodyPart}</h3>
-                <p>Pinpoint the location of pain/discomfort and rate intensity on the Wong-Baker visual scale</p>
+                <p className="step-eyebrow">Step 3 of 5</p>
+                <h3>Tell us what’s bothering you</h3>
+                <p>Choose an area, rate your pain if needed, then describe your concern in your own words.</p>
               </div>
             </div>
 
@@ -575,6 +561,10 @@ export const KioskView: React.FC<KioskViewProps> = ({ onCompleteEncounter }) => 
                   setSelectedBodyPart(reg);
                   setSocrates((prev: SocratesData) => ({ ...prev, site: reg }));
                 }}
+                painScore={painScore}
+                onAddSymptomTag={(tag) => {
+                  setSymptomText((prev) => (prev ? `${prev}, ${tag}` : tag));
+                }}
               />
               <PainScale
                 score={painScore}
@@ -582,161 +572,100 @@ export const KioskView: React.FC<KioskViewProps> = ({ onCompleteEncounter }) => 
                   setPainScore(score);
                   setSocrates((prev: SocratesData) => ({ ...prev, severity: score }));
                 }}
+                selectedCharacter={socrates.character}
+                onSelectCharacter={(char) => {
+                  setSocrates((prev: SocratesData) => ({ ...prev, character: char }));
+                }}
               />
             </div>
-          </div>
-        )}
 
-        {/* STEP 4: Clinical Dialogue State Machine (SOCRATES / AYUSH) */}
-        {step === 4 && (
-          <div className="kiosk-step-card animate-fadeIn">
-            <div className="step-intro">
-              <Stethoscope className="step-intro-icon text-emerald-400" />
-              <div>
-                <h3>
-                  {clinicalMode === 'ALLOPATHIC'
-                    ? 'Allopathic Multimodal Dialogue Engine (SOCRATES Framework)'
-                    : 'AYUSH Multimodal Dialogue Engine (Dashavidha & Ashtavidha Pariksha)'}
-                </h3>
-                <p>Speak in your regional language or refine the clinical parameters below</p>
+            <div className="intake-divider" />
+            <div className="intake-copy">
+              <div className="intake-copy-header">
+                <h4>Describe your symptoms & clinical details</h4>
+                <div className="live-telemetry-tag">
+                  <span>📍 {selectedBodyPart.split('/')[0].trim()}</span>
+                  <span className="dot-sep">•</span>
+                  <span>⚡ Pain: {painScore}/10</span>
+                  {socrates.character && (
+                    <>
+                      <span className="dot-sep">•</span>
+                      <span>✨ {socrates.character.split('/')[0].trim()}</span>
+                    </>
+                  )}
+                </div>
               </div>
+              <p>You can use the microphone, select the suggested chips below, or type your symptoms.</p>
             </div>
-
-            {/* Voice Input & Real-Time IndicASR Bar */}
             <VoiceInputBar
               value={symptomText}
               onChange={setSymptomText}
               langCode={language}
+              selectedRegion={selectedBodyPart}
               placeholder={
                 clinicalMode === 'ALLOPATHIC'
-                  ? 'Describe your symptoms in detail (e.g. pain duration, character, radiation)...'
+                  ? 'For example: when it started, what it feels like, and what makes it better or worse.'
                   : 'अपने लक्षण, पाचन क्षमता और दिनचर्या के बारे में बताएं...'
               }
             />
 
-            {/* Structured State Machine Fields */}
             {clinicalMode === 'ALLOPATHIC' ? (
               <div className="socrates-form-grid">
                 <div className="socrates-field">
-                  <label>Onset & Timing (कब से शुरू हुआ?)</label>
-                  <input
-                    type="text"
-                    value={socrates.onset}
-                    onChange={(e) => setSocrates({ ...socrates, onset: e.target.value })}
-                    className="kiosk-text-input"
-                  />
+                  <label>When did it start?</label>
+                  <input type="text" value={socrates.onset} onChange={(e) => setSocrates({ ...socrates, onset: e.target.value })} className="kiosk-text-input" />
                 </div>
-
                 <div className="socrates-field">
-                  <label>Character of Pain (दर्द का प्रकार)</label>
-                  <select
-                    value={socrates.character}
-                    onChange={(e) => setSocrates({ ...socrates, character: e.target.value })}
-                    className="kiosk-select"
-                  >
-                    <option value="Crushing / Heavy pressure">Crushing / Heavy pressure (दबाव जैसा)</option>
-                    <option value="Sharp / Stabbing">Sharp / Stabbing (तेज़ चुभन)</option>
-                    <option value="Dull Ache">Dull Ache (हल्का लगातार दर्द)</option>
-                    <option value="Burning / Throbbing">Burning / Throbbing (जलन / टीस)</option>
-                    <option value="Colicky / Cramping">Colicky / Cramping (मरोड़दार)</option>
+                  <label>What does it feel like?</label>
+                  <select value={socrates.character} onChange={(e) => setSocrates({ ...socrates, character: e.target.value })} className="kiosk-select">
+                    <option value="Crushing / Heavy pressure">Pressure or heaviness</option>
+                    <option value="Sharp / Stabbing">Sharp or stabbing</option>
+                    <option value="Dull Ache">Dull ache</option>
+                    <option value="Burning / Throbbing">Burning or throbbing</option>
+                    <option value="Colicky / Cramping">Cramping</option>
                   </select>
                 </div>
-
                 <div className="socrates-field">
-                  <label>Radiation (क्या दर्द कहीं और फैलता है?)</label>
-                  <input
-                    type="text"
-                    value={socrates.radiation}
-                    onChange={(e) => setSocrates({ ...socrates, radiation: e.target.value })}
-                    className="kiosk-text-input"
-                  />
+                  <label>Does it spread anywhere else?</label>
+                  <input type="text" value={socrates.radiation} onChange={(e) => setSocrates({ ...socrates, radiation: e.target.value })} className="kiosk-text-input" />
                 </div>
-
                 <div className="socrates-field">
-                  <label>Exacerbating / Relieving Factors</label>
-                  <input
-                    type="text"
-                    value={socrates.exacerbatingRelieving}
-                    onChange={(e) => setSocrates({ ...socrates, exacerbatingRelieving: e.target.value })}
-                    className="kiosk-text-input"
-                  />
+                  <label>What makes it better or worse?</label>
+                  <input type="text" value={socrates.exacerbatingRelieving} onChange={(e) => setSocrates({ ...socrates, exacerbatingRelieving: e.target.value })} className="kiosk-text-input" />
                 </div>
               </div>
             ) : (
               <div className="ayush-form-grid">
                 <div className="ayush-field">
                   <label>Prakriti (प्रकृति)</label>
-                  <select
-                    value={ayush.prakriti}
-                    onChange={(e) => setAyush({ ...ayush, prakriti: e.target.value as any })}
-                    className="kiosk-select"
-                  >
-                    <option value="Vata-Pitta">Vata-Pitta (वात-पित्त)</option>
-                    <option value="Pitta-Kapha">Pitta-Kapha (पित्त-कफ)</option>
-                    <option value="Vata-Kapha">Vata-Kapha (वात-कफ)</option>
-                    <option value="Vata">Vata (वात)</option>
-                    <option value="Pitta">Pitta (पित्त)</option>
-                    <option value="Kapha">Kapha (कफ)</option>
-                    <option value="Tridoshaja">Tridoshaja (त्रिदोषज)</option>
+                  <select value={ayush.prakriti} onChange={(e) => setAyush({ ...ayush, prakriti: e.target.value as any })} className="kiosk-select">
+                    <option value="Vata-Pitta">Vata-Pitta (वात-पित्त)</option><option value="Pitta-Kapha">Pitta-Kapha (पित्त-कफ)</option><option value="Vata-Kapha">Vata-Kapha (वात-कफ)</option><option value="Vata">Vata (वात)</option><option value="Pitta">Pitta (पित्त)</option><option value="Kapha">Kapha (कफ)</option><option value="Tridoshaja">Tridoshaja (त्रिदोषज)</option>
                   </select>
                 </div>
-
                 <div className="ayush-field">
-                  <label>Agni / Digestive Capacity (अग्नि)</label>
-                  <select
-                    value={ayush.aharaShakti.jaranaShakti}
-                    onChange={(e) =>
-                      setAyush({
-                        ...ayush,
-                        aharaShakti: { ...ayush.aharaShakti, jaranaShakti: e.target.value as any },
-                      })
-                    }
-                    className="kiosk-select"
-                  >
-                    <option value="Vishamagni">Vishamagni - Irregular (विषमाग्नि)</option>
-                    <option value="Mandagni">Mandagni - Sluggish (मंदाग्नि)</option>
-                    <option value="Teekshnagni">Teekshnagni - High Acidic (तीक्ष्णाग्नि)</option>
-                    <option value="Samagni">Samagni - Balanced (समाग्नि)</option>
+                  <label>Agni / Digestive capacity (अग्नि)</label>
+                  <select value={ayush.aharaShakti.jaranaShakti} onChange={(e) => setAyush({ ...ayush, aharaShakti: { ...ayush.aharaShakti, jaranaShakti: e.target.value as any } })} className="kiosk-select">
+                    <option value="Vishamagni">Vishamagni - Irregular (विषमाग्नि)</option><option value="Mandagni">Mandagni - Sluggish (मंदाग्नि)</option><option value="Teekshnagni">Teekshnagni - High Acidic (तीक्ष्णाग्नि)</option><option value="Samagni">Samagni - Balanced (समाग्नि)</option>
                   </select>
                 </div>
-
-                <div className="ayush-field">
-                  <label>Nadi Pariksha (नाड़ी परीक्षा लक्षण)</label>
-                  <input
-                    type="text"
-                    value={ayush.ashtavidha.nadi}
-                    onChange={(e) =>
-                      setAyush({
-                        ...ayush,
-                        ashtavidha: { ...ayush.ashtavidha, nadi: e.target.value },
-                      })
-                    }
-                    className="kiosk-text-input"
-                  />
-                </div>
-
-                <div className="ayush-field">
-                  <label>Sleep & Lifestyle (निद्रा एवं विहार)</label>
-                  <input
-                    type="text"
-                    value={ayush.aharaVihara.sleepPattern}
-                    onChange={(e) =>
-                      setAyush({
-                        ...ayush,
-                        aharaVihara: { ...ayush.aharaVihara, sleepPattern: e.target.value },
-                      })
-                    }
-                    className="kiosk-text-input"
-                  />
-                </div>
+                <div className="ayush-field"><label>Nadi symptoms (नाड़ी परीक्षा लक्षण)</label><input type="text" value={ayush.ashtavidha.nadi} onChange={(e) => setAyush({ ...ayush, ashtavidha: { ...ayush.ashtavidha, nadi: e.target.value } })} className="kiosk-text-input" /></div>
+                <div className="ayush-field"><label>Sleep & lifestyle (निद्रा एवं विहार)</label><input type="text" value={ayush.aharaVihara.sleepPattern} onChange={(e) => setAyush({ ...ayush, aharaVihara: { ...ayush.aharaVihara, sleepPattern: e.target.value } })} className="kiosk-text-input" /></div>
               </div>
             )}
           </div>
         )}
 
-        {/* STEP 5: Medical Document AI Scanner */}
-        {step === 5 && (
+        {/* STEP 4: Documents (optional) */}
+        {step === 4 && (
           <div className="kiosk-step-card animate-fadeIn">
+            <div className="step-intro">
+              <FileText className="step-intro-icon" />
+              <div>
+                <p className="step-eyebrow">Step 4 of 5 · Optional</p>
+                <h3>Bring your records with you</h3>
+                <p>Add a previous prescription or report so your clinician can review it sooner.</p>
+              </div>
+            </div>
             <DocumentScanner
               scannedDocs={scannedDocs}
               onAddScan={(doc) => setScannedDocs([...scannedDocs, doc])}
@@ -745,8 +674,8 @@ export const KioskView: React.FC<KioskViewProps> = ({ onCompleteEncounter }) => 
           </div>
         )}
 
-        {/* STEP 6: Synthesis, Red-Flag Triage & Token Print */}
-        {step === 6 && (
+        {/* STEP 5: Triage & token */}
+        {step === 5 && (
           <div className="kiosk-step-card animate-fadeIn">
             {completedEncounter && (
               <div className="token-final-layout">
@@ -841,7 +770,7 @@ export const KioskView: React.FC<KioskViewProps> = ({ onCompleteEncounter }) => 
 
       {/* Kiosk Footer Navigation Bar */}
       <div className="kiosk-footer-nav">
-        {step > 1 && step < 6 && (
+        {step > 1 && step < 5 && (
           <button type="button" className="nav-btn-secondary" onClick={handleBack}>
             <ChevronLeft className="w-5 h-5" />
             <span>{t.back}</span>
@@ -849,12 +778,12 @@ export const KioskView: React.FC<KioskViewProps> = ({ onCompleteEncounter }) => 
         )}
 
         <div className="footer-step-counter">
-          <span>Step {step} of 6</span>
+          <span>Step {step} of 5</span>
         </div>
 
-        {step < 6 && (
+        {step < 5 && (
           <button type="button" className="nav-btn-primary" onClick={handleNext}>
-            <span>{step === 5 ? t.printToken : t.next}</span>
+            <span>{step === 4 ? 'Finish check-in' : t.next}</span>
             <ChevronRight className="w-5 h-5" />
           </button>
         )}

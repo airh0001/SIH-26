@@ -6,9 +6,6 @@ import {
   Stethoscope,
   SplitSquareVertical,
   AlertTriangle,
-  Cpu,
-  Radio,
-  Sun,
 } from 'lucide-react';
 import type { PatientEncounter } from '../../types';
 
@@ -29,25 +26,12 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onSelectView, encou
             <HeartPulse className="brand-icon" />
           </div>
           <div className="brand-title-group">
-            <div className="brand-name-row">
-              <span className="brand-name">ABHA PRO</span>
-              <span className="brand-version">v2.5 (Clinical Light)</span>
-            </div>
-            <span className="brand-subtitle">Multimodal AI OPD Triage & Clinical Workstation</span>
+            <span className="brand-name">ABHA PRO</span>
+            <span className="brand-subtitle">Care workspace</span>
           </div>
         </div>
 
-        {/* ABDM & Edge Status Indicators */}
-        <div className="status-indicators-strip">
-          <div className="status-pill abdm-pill" title="ABDM Gateway M1, M2 & M3 Active">
-            <Radio className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
-            <span>ABDM Gateway: Live</span>
-          </div>
-          <div className="status-pill edge-pill" title="On-Premise Clinical AI Model Ready">
-            <Cpu className="w-3.5 h-3.5 text-sky-600" />
-            <span>Edge AI (Med-Llama-3)</span>
-          </div>
-        </div>
+        <span className="header-connection"><i />ABHA connected</span>
       </div>
 
       {/* Center View Selector Navigation */}
@@ -99,10 +83,6 @@ export const Header: React.FC<HeaderProps> = ({ currentView, onSelectView, encou
           </div>
         )}
 
-        <div className="theme-status-chip">
-          <Sun className="w-3.5 h-3.5 text-amber-500" />
-          <span>Clinical Light Mode</span>
-        </div>
       </div>
     </header>
   );

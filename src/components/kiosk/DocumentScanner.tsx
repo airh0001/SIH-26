@@ -30,9 +30,9 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({
     <div className="document-scanner-module">
       <div className="doc-scanner-header">
         <div>
-          <h4 className="doc-scanner-title">Edge Multimodal Document AI Feed</h4>
+          <h4 className="doc-scanner-title">Add a previous prescription or report</h4>
           <p className="doc-scanner-subtitle">
-            Digitize handwritten Indian physician prescriptions & semi-structured lab panels (TrOCR + LayoutLMv3 + BioBERT)
+            Select a record below to add it to your clinician’s review.
           </p>
         </div>
         <div className="scanner-badge-row">
@@ -50,7 +50,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({
                 <div className="laser-scan-line"></div>
                 <div className="scanning-spinner-box">
                   <RefreshCw className="spin-icon text-cyan-400" />
-                  <span className="scanning-text">Running OpenCV Deskewing & LayoutLMv3 NER...</span>
+                  <span className="scanning-text">Reading your document…</span>
                 </div>
               </div>
             ) : (
@@ -69,7 +69,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({
 
           {/* Preset Document Feeder Options */}
           <div className="preset-docs-section">
-            <span className="section-label">Select Document Template for Ingestion:</span>
+            <span className="section-label">Choose a document to add</span>
             <div className="preset-list">
               {SAMPLE_DOCUMENTS.map((doc) => (
                 <button
@@ -87,7 +87,7 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({
                     <span className="doc-name">{doc.name}</span>
                     <span className="doc-meta">{doc.type} • {doc.facility}</span>
                   </div>
-                  <span className="doc-action-tag">Ingest & OCR</span>
+                  <span className="doc-action-tag">Add record</span>
                 </button>
               ))}
             </div>
@@ -97,13 +97,13 @@ export const DocumentScanner: React.FC<DocumentScannerProps> = ({
         {/* Right: Extracted Digital Records */}
         <div className="extracted-records-pane">
           <div className="extracted-header">
-            <h5>Digitized Clinical Entities ({scannedDocs.length} Documents Processed)</h5>
+            <h5>Your records ({scannedDocs.length} added)</h5>
           </div>
 
           {scannedDocs.length === 0 ? (
             <div className="empty-scan-placeholder">
               <FileText className="empty-icon" />
-              <p>No documents scanned yet. Choose a preset or feed a document on the left.</p>
+              <p>No records added yet. This step is optional.</p>
             </div>
           ) : (
             <div className="scanned-items-container">

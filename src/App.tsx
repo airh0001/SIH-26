@@ -7,7 +7,7 @@ import { INITIAL_PATIENTS } from './store/encounterStore';
 import type { PatientEncounter, SoapNote } from './types';
 
 export const App: React.FC = () => {
-  const [viewMode, setViewMode] = useState<'KIOSK' | 'IVR' | 'DOCTOR' | 'DUAL'>('DOCTOR');
+  const [viewMode, setViewMode] = useState<'KIOSK' | 'IVR' | 'DOCTOR' | 'DUAL'>('KIOSK');
   const [encounters, setEncounters] = useState<PatientEncounter[]>(INITIAL_PATIENTS);
   const [selectedEncounterId, setSelectedEncounterId] = useState<string>(INITIAL_PATIENTS[0]?.id || '');
 

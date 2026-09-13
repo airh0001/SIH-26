@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Mic, Volume2, Sparkles } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Mic, MicOff, Volume2, Sparkles, X, Radio } from 'lucide-react';
 import type { LanguageCode } from '../../types';
 import { speakText, SUPPORTED_LANGUAGES } from '../../utils/languages';
 
@@ -9,14 +9,68 @@ interface VoiceInputBarProps {
   langCode: LanguageCode;
   placeholder?: string;
   onAutoSubmit?: (transcript: string) => void;
+  selectedRegion?: string;
 }
 
-const QUICK_SYMPTOM_CHIPS: Array<{ label: string; text: string; lang: string }> = [
-  { label: '🫀 Chest Pain + Left Arm + Sweating (ACS Red Flag)', text: 'Severe crushing chest pain radiating to left arm and neck with profuse cold sweating for 1 hour.', lang: 'en' },
-  { label: '🩸 Burning Feet + Thirst (Diabetic Neuropathy)', text: 'Burning sensation in both feet with excessive thirst and frequent urination at night for 3 months.', lang: 'en' },
-  { label: '🌿 Gas Distension + Joint Crepitus (AYUSH Vata)', text: 'Pet me gas aur afara rehta hai, khana theek se nahi pachta, aur ghutno me aawaz aati hai.', lang: 'hi' },
-  { label: '🫁 Shortness of Breath + Wheezing', text: 'Difficulty breathing especially when lying flat, coughing with wheezing sound.', lang: 'en' },
-  { label: '🧠 Sudden Weakness on Left Side', text: 'Sudden weakness in left arm and leg with difficulty in speaking clearly since morning.', lang: 'en' },
+const REGION_SYMPTOM_MAP: Record<string, string[]> = {
+  'Central Chest (Retrosternal)': [
+    'Crushing retrosternal chest pain with left arm radiation',
+    'Severe chest tightness with cold diaphoresis',
+    'Sudden heavy pressure behind breastbone while walking',
+    'Heart racing with shortness of breath',
+  ],
+  'Bilateral Lungs & Ribs': [
+    'Sharp chest pain on deep breathing with dry cough',
+    'Wheezing and progressive breathlessness for 2 days',
+    'Difficulty catching breath when lying flat (orthopnea)',
+  ],
+  'Head & Neck': [
+    'Severe pulsating throbbing migraine on one side of head',
+    'Sudden onset blinding headache with nausea',
+    'Dizziness and room spinning when turning head',
+  ],
+  'Eyes, ENT & Face': [
+    'Severe throat irritation with difficulty swallowing',
+    'Severe ear pain with ringing sound and fever',
+    'Facial sinus tenderness and nasal congestion',
+  ],
+  'Upper Abdomen / Epigastric': [
+    'Burning epigastric acidity that radiates to throat',
+    'Severe gnawing upper stomach pain 30 mins after food',
+    'Bloating, nausea and acid reflux for 2 weeks',
+  ],
+  'Lower Abdomen & Pelvis': [
+    'Sharp colicky pelvic pain with burning urination',
+    'Lower abdominal cramping and irregular bowels',
+    'Constant dull discomfort in lower pelvic area',
+  ],
+  'Bilateral Lower Limbs & Knees': [
+    'Bilateral knee stiffness and crepitus when climbing stairs',
+    'Swollen painful knee joint after physical exertion',
+    'Severe morning stiffness lasting over 30 minutes',
+  ],
+  'Feet & Ankles': [
+    'Severe burning sensation in soles of both feet at night',
+    'Numbness and pins-and-needles sensation in toes',
+    'Sharp stabbing pain in heel upon first morning step',
+  ],
+  'Lower Back & Lumbar': [
+    'Sharp lower back spasm shooting down back of left leg',
+    'Chronic dull aching in lumbar spine after sitting',
+    'Inability to bend forward without severe shooting pain',
+  ],
+  'Cervical Spine & Neck': [
+    'Stiff neck with pain radiating down to shoulder and arm',
+    'Tingling in fingers with upper neck muscle tightness',
+  ],
+};
+
+const GLOBAL_COMMON_SYMPTOMS = [
+  'Severe crushing chest pain radiating to left arm and jaw with profuse sweating',
+  'Burning sensation in both feet with excessive thirst and frequent night urination',
+  'Chronic gas, indigestion, stomach fullness, and joint crepitus',
+  'Difficulty breathing with audible wheezing and dry cough',
+  'Sudden unilateral weakness in left arm with slurred speech',
 ];
 
 export const VoiceInputBar: React.FC<VoiceInputBarProps> = ({
@@ -25,6 +79,7 @@ export const VoiceInputBar: React.FC<VoiceInputBarProps> = ({
   langCode,
   placeholder,
   onAutoSubmit,
+  selectedRegion,
 }) => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -68,7 +123,6 @@ export const VoiceInputBar: React.FC<VoiceInputBarProps> = ({
         try {
           recognitionRef.current.start();
         } catch (e) {
-          // fallback simulation
           simulateSpeechCapture();
         }
       } else {
@@ -80,13 +134,15 @@ export const VoiceInputBar: React.FC<VoiceInputBarProps> = ({
   const simulateSpeechCapture = () => {
     setIsListening(true);
     setTimeout(() => {
-      if (langCode === 'hi') {
-        onChange('मुझे छाती में बहुत तेज़ दर्द और पसीना आ रहा है जो बाएं हाथ में जा रहा है');
+      if (selectedRegion && REGION_SYMPTOM_MAP[selectedRegion]) {
+        onChange(REGION_SYMPTOM_MAP[selectedRegion][0]);
+      } else if (langCode === 'hi') {
+        onChange('मुझे छाती में बहुत तेज़ दर्द और पसीना आ रहा है जो बाएं हाथ में फैल रहा है');
       } else {
-        onChange('Severe crushing chest pain radiating to left arm with cold sweating');
+        onChange('Severe crushing chest pain radiating to left arm with cold diaphoresis');
       }
       setIsListening(false);
-    }, 2500);
+    }, 2400);
   };
 
   const handleSpeak = async () => {
@@ -96,72 +152,104 @@ export const VoiceInputBar: React.FC<VoiceInputBarProps> = ({
     setIsSpeaking(false);
   };
 
+  const contextualSuggestions = useMemo(() => {
+    if (selectedRegion && REGION_SYMPTOM_MAP[selectedRegion]) {
+      return REGION_SYMPTOM_MAP[selectedRegion];
+    }
+    return GLOBAL_COMMON_SYMPTOMS;
+  }, [selectedRegion]);
+
   return (
-    <div className="voice-input-wrapper">
-      <div className={`voice-input-box ${isListening ? 'listening-active' : ''}`}>
+    <div className="modern-voice-module">
+      {/* Search / Voice Main Input Frame */}
+      <div className={`voice-input-frame ${isListening ? 'listening-pulse' : ''}`}>
         <button
           type="button"
-          className={`mic-trigger-btn ${isListening ? 'mic-pulse' : ''}`}
+          className={`mic-power-btn ${isListening ? 'active' : ''}`}
           onClick={toggleListening}
-          title={isListening ? 'Stop Listening' : 'Tap to Speak (Indic Conformer ASR)'}
+          title={isListening ? 'Stop Listening' : 'Tap to Speak (Indic Conformer Speech AI)'}
         >
-          {isListening ? <Mic className="mic-icon pulse" /> : <Mic className="mic-icon" />}
+          {isListening ? (
+            <Radio className="w-5 h-5 text-rose-500 animate-pulse" />
+          ) : (
+            <Mic className="w-5 h-5 text-sky-600" />
+          )}
+          <span className="mic-btn-label">{isListening ? 'Listening...' : 'Voice AI'}</span>
         </button>
 
-        <div className="voice-input-field-wrapper">
+        <div className="voice-input-center">
           <input
             type="text"
-            className="voice-text-input"
+            className="voice-main-input"
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={
               isListening
-                ? '🎙️ AI4Bharat IndicASR is listening... Speak now'
-                : placeholder || 'Type or tap microphone to speak your symptoms...'
+                ? '🎙️ Listening to your voice... Speak your symptoms clearly'
+                : placeholder || 'Type or speak your symptoms in your regional language...'
             }
           />
 
           {isListening && (
-            <div className="audio-waveform-bars">
-              <span className="wave-bar bar-1"></span>
-              <span className="wave-bar bar-2"></span>
-              <span className="wave-bar bar-3"></span>
-              <span className="wave-bar bar-4"></span>
-              <span className="wave-bar bar-5"></span>
-              <span className="wave-bar bar-6"></span>
+            <div className="telemetry-soundwave">
+              <span className="soundwave-bar bar-1"></span>
+              <span className="soundwave-bar bar-2"></span>
+              <span className="soundwave-bar bar-3"></span>
+              <span className="soundwave-bar bar-4"></span>
+              <span className="soundwave-bar bar-5"></span>
+              <span className="soundwave-bar bar-6"></span>
+              <span className="soundwave-bar bar-7"></span>
             </div>
           )}
         </div>
 
-        {value.trim() && (
-          <button
-            type="button"
-            className={`tts-playback-btn ${isSpeaking ? 'speaking' : ''}`}
-            onClick={handleSpeak}
-            title="Listen back via FastSpeech2 IndicTTS"
-          >
-            <Volume2 className="tts-icon" />
-          </button>
-        )}
+        {/* Action icons (Clear, Speak back) */}
+        <div className="voice-action-cluster">
+          {value.trim() && (
+            <>
+              <button
+                type="button"
+                className="voice-clear-btn"
+                onClick={() => onChange('')}
+                title="Clear text"
+              >
+                <X className="w-4 h-4 text-slate-400" />
+              </button>
+              <button
+                type="button"
+                className={`voice-tts-btn ${isSpeaking ? 'active' : ''}`}
+                onClick={handleSpeak}
+                title="Listen back (FastSpeech2 IndicTTS)"
+              >
+                <Volume2 className="w-4 h-4 text-sky-600" />
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Quick symptom presets for fast test demos */}
-      <div className="quick-symptoms-tray">
-        <span className="tray-label">
-          <Sparkles className="spark-icon" /> Quick Demo Scenarios:
-        </span>
-        <div className="chips-scroll">
-          {QUICK_SYMPTOM_CHIPS.map((chip, idx) => (
+      {/* Dynamic Contextual Suggestion Pills */}
+      <div className="voice-suggestions-tray">
+        <div className="suggestions-badge">
+          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          <span>
+            {selectedRegion
+              ? `Suggested descriptions for ${selectedRegion.split('/')[0].split('(')[0]}:`
+              : 'Tap a quick clinical symptom description:'}
+          </span>
+        </div>
+        <div className="suggestions-chips-row">
+          {contextualSuggestions.map((text, idx) => (
             <button
               type="button"
               key={idx}
-              className="symptom-chip"
+              className="context-symptom-chip"
               onClick={() => {
-                onChange(chip.text);
-                if (onAutoSubmit) onAutoSubmit(chip.text);
+                onChange(text);
+                if (onAutoSubmit) onAutoSubmit(text);
               }}
             >
-              {chip.label}
+              <span>{text}</span>
             </button>
           ))}
         </div>
